@@ -1,6 +1,6 @@
 <script setup>
-import { NAV_ITEMS } from '../constants';
-import { isPageValid } from '../validators';
+import { NAV_ITEMS } from '../constants'
+import { isPageValid } from '../validators'
 import NavItem from './NavItem.vue'
 
 defineProps({
@@ -23,10 +23,10 @@ const emit = defineEmits({
         v-for="(icon, page) in NAV_ITEMS"
         :key="page"
         :href="`#${page}`"
-        :class="{ 'bg-gray-200 pointer-events-none': page === currentPage }"
+        :class="{ 'pointer-events-none bg-gray-200': page === currentPage }"
         @click="emit('navigate', page)"
       >
-        <component class="h-6 w-6" :is="icon" /> {{ page }}
+        <component :is="icon" class="h-6 w-6" /> {{ page }}
       </NavItem>
     </ul>
   </nav>
