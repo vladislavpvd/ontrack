@@ -1,48 +1,24 @@
 <script setup>
-import { NULLABLE_ACTIVITY } from '../constants'
-import {
-  isActivityValid,
-  isTimelineItemValid,
-  validateSelectOptions,
-  validateActivities,
-  isHourValid,
-isNumber
-} from '../validators'
+import { inject } from 'vue'
+import { isTimelineItemValid, isHourValid } from '../validators'
 import BaseSelect from './BaseSelect.vue'
 import TimelineHour from './TimelineHour.vue'
 import TimelineStopwatch from './TimelineStopwatch.vue'
 
-const props = defineProps({
+defineProps({
   timelineItem: {
     required: true,
     type: Object,
     validator: isTimelineItemValid
-  },
-  activities: {
-    required: true,
-    type: Array,
-    validator: validateActivities
-  },
-  activitySelectOptions: {
-    required: true,
-    type: Array,
-    validator: validateSelectOptions
   }
 })
 
 const emit = defineEmits({
-  updateActivitySeconds: isNumber,
-  selectActivity: isActivityValid,
-  scrollToHour: isHourValid,
+  scrollToHour: isHourValid
 })
 
-function selectActivity(id) {
-  emit('selectActivity', findActivityById(id))
-}
-
-function findActivityById(id) {
-  return props.activities.find((activity) => activity.id === id) || NULLABLE_ACTIVITY
-}
+const setTimelineItemActivity = inject('setTimelineItemActivity')
+const activitySelectOptions = inject('activitySelectOptions')
 </script>
 
 <template>
@@ -55,12 +31,8 @@ function findActivityById(id) {
       placeholder="Rest"
       :selected="timelineItem.activityId"
       :options="activitySelectOptions"
-      @select="selectActivity"
+      @select="setTimelineItemActivity(timelineItem, $event)"
     />
-    <TimelineStopwatch
-      :seconds="timelineItem.activitySeconds"
-      :hour="timelineItem.hour"
-      @update-seconds="emit('updateActivitySeconds', $event)"
-    />
+    <TimelineStopwatch :timeline-item="timelineItem" />
   </li>
 </template>

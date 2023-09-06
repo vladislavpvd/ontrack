@@ -1,18 +1,15 @@
 <script setup>
-import { nextTick, ref } from 'vue';
+import { inject, nextTick, ref } from 'vue'
 import { PlusIcon } from '@heroicons/vue/24/outline'
-import { isActivityValid } from '../validators'
 import BaseButton from './BaseButton.vue'
-import { id } from '../functions';
+import { id } from '../functions'
 
-const emit = defineEmits({
-  submit: isActivityValid
-})
+const createActivity = inject('createActivity')
 
 const name = ref('')
 
 async function submit() {
-  emit('submit', {
+  createActivity({
     id: id(),
     name: name.value,
     secondsToComplete: 0
@@ -27,7 +24,10 @@ async function submit() {
 </script>
 
 <template>
-  <form @submit.prevent="submit" class="sticky w-full bottom-[61px] flex gap-2 border-t bg-white p-4">
+  <form
+    @submit.prevent="submit"
+    class="sticky bottom-[61px] flex w-full gap-2 border-t bg-white p-4"
+  >
     <input
       type="text"
       v-model="name"
