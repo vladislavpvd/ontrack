@@ -1,6 +1,7 @@
 <script setup>
 import { inject } from 'vue'
-import { isTimelineItemValid, isHourValid } from '../validators'
+import { isTimelineItemValid, isUndefined } from '../validators'
+import { setTimelineItemActivityKey, activitySelectOptionsKey } from '../keys'
 import BaseSelect from './BaseSelect.vue'
 import TimelineHour from './TimelineHour.vue'
 import TimelineStopwatch from './TimelineStopwatch.vue'
@@ -14,11 +15,11 @@ defineProps({
 })
 
 const emit = defineEmits({
-  scrollToHour: isHourValid
+  scrollToHour: isUndefined
 })
 
-const setTimelineItemActivity = inject('setTimelineItemActivity')
-const activitySelectOptions = inject('activitySelectOptions')
+const setTimelineItemActivity = inject(setTimelineItemActivityKey)
+const activitySelectOptions = inject(activitySelectOptionsKey)
 </script>
 
 <template>
