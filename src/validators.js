@@ -1,7 +1,12 @@
 import { NAV_ITEMS, HOURS_IN_DAY, MIDNIGHT_HOUR, BUTTON_TYPES } from './constants'
+import { ICONS } from './icons.js'
 
 export function isPageValid(page) {
   return NAV_ITEMS.some((navItem) => navItem.page === page)
+}
+
+export function isIconValid(icon) {
+  return Object.keys(ICONS).includes(icon)
 }
 
 export function isNavItemValid(navItem) {
@@ -30,10 +35,6 @@ export function isActivityValid({ id, name, secondsToComplete }) {
   }
 
   return [isNotEmptyString(id), isNotEmptyString(name), isNumber(secondsToComplete)].every(Boolean)
-}
-
-function isNotEmptyString(value) {
-  return isString(value) && value.length > 0
 }
 
 export function isHourValid(hour) {
@@ -74,6 +75,10 @@ export function isNumber(value) {
 
 function isBetween(value, start, end) {
   return value >= start && value <= end
+}
+
+function isNotEmptyString(value) {
+  return isString(value) && value.length > 0
 }
 
 function isString(value) {
