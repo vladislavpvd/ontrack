@@ -1,9 +1,7 @@
 <script setup>
-import { computed } from 'vue'
-import { formatSeconds, getProgressColorClass } from '../functions'
+import { formatSeconds } from '../functions'
 import { isActivityValid } from '../validators'
-import { calculateActivityCompletionPercentage } from '../activities'
-import { timelineItems, calculateTrackedActivitySeconds } from '../timeline-items'
+import { useProgress } from '../composables/progress'
 
 const props = defineProps({
   activity: {
@@ -13,20 +11,17 @@ const props = defineProps({
   }
 })
 
-const percentage = computed(() =>
-  calculateActivityCompletionPercentage(props.activity, trackedActivitySeconds.value)
-)
-
-const trackedActivitySeconds = computed(() =>
-  calculateTrackedActivitySeconds(timelineItems.value, props.activity)
-)
+const { colorClass, percentage, trackedActivitySeconds } = useProgress(props.activity)
 </script>
 
 <template>
   <li class="flex flex-col gap-1 p-4">
     <div class="truncate text-xl">{{ activity.name }}</div>
     <div class="flex h-5 overflow-hidden rounded bg-neutral-200">
-      <div :class="getProgressColorClass(percentage)" :style="`width: ${percentage}%`" />
+      <div
+        :class="['transition-all', colorClass]"
+        :style="{ width: `${Math.min(percentage, 100)}%` }"
+      />
     </div>
     <div class="flex justify-between font-mono text-sm">
       <span>{{ percentage }}%</span>
