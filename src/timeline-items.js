@@ -1,10 +1,37 @@
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { HOURS_IN_DAY, MIDNIGHT_HOUR } from './constants'
-import { currentHour } from './functions'
+import { endOfHour, isToday, now, toSeconds, today } from './time'
+import { stopTimelineItemTimer } from './timeline-item-timer'
 
 export const timelineItemRefs = ref([])
 
-export const timelineItems = ref(generateTimelineItems())
+export const timelineItems = ref([])
+
+export const activeTimelineItem = computed(() =>
+  timelineItems.value.find(({ isActive }) => isActive)
+)
+
+watch(now, (after, before) => {
+  if (activeTimelineItem.value && activeTimelineItem.value.hour !== after.getHours()) {
+    stopTimelineItemTimer()
+  }
+
+  if (before.getHours() !== after.getHours() && after.getHours() === MIDNIGHT_HOUR) {
+    resetTimelineItems()
+  }
+})
+
+export function initializeTimelineItems(state) {
+  const lastActiveAt = new Date(state.lastActiveAt)
+
+  timelineItems.value = state.timelineItems ?? generateTimelineItems()
+
+  if (activeTimelineItem.value && isToday(lastActiveAt)) {
+    syncIdleSeconds(lastActiveAt)
+  } else if (state.timelineItems && !isToday(lastActiveAt)) {
+    resetTimelineItems()
+  }
+}
 
 export function updateTimelineItem(timelineItem, fields) {
   return Object.assign(timelineItem, fields)
@@ -14,7 +41,7 @@ export function resetTimelineItemActivities(timelineItems, activity) {
   filterTimelineItemsByActivity(timelineItems, activity).forEach((timelineItem) =>
     updateTimelineItem(timelineItem, {
       activityId: null,
-      activitySeconds: timelineItem.hour === currentHour() ? timelineItem.activitySeconds : 0
+      activitySeconds: timelineItem.hour === today().getHours() ? timelineItem.activitySeconds : 0
     })
   )
 }
@@ -26,13 +53,34 @@ export function calculateTrackedActivitySeconds(timelineItems, activity) {
 }
 
 export function scrollToCurrentHour(isSmooth = false) {
-  scrollToHour(currentHour(), isSmooth)
+  scrollToHour(today().getHours(), isSmooth)
 }
 
 export function scrollToHour(hour, isSmooth = true) {
   const el = hour === MIDNIGHT_HOUR ? document.body : timelineItemRefs.value[hour - 1].$el
 
   el.scrollIntoView({ behavior: isSmooth ? 'smooth' : 'instant' })
+}
+
+function resetTimelineItems() {
+  timelineItems.value.forEach((timelineItem) =>
+    updateTimelineItem(timelineItem, {
+      activitySeconds: 0,
+      isActive: false
+    })
+  )
+}
+
+function syncIdleSeconds(lastActiveAt) {
+  updateTimelineItem(activeTimelineItem.value, {
+    activitySeconds: activeTimelineItem.value.activitySeconds + calculateIdleSeconds(lastActiveAt)
+  })
+}
+
+function calculateIdleSeconds(lastActiveAt) {
+  return lastActiveAt.getHours() === today().getHours()
+    ? toSeconds(today() - lastActiveAt)
+    : toSeconds(endOfHour(lastActiveAt) - lastActiveAt)
 }
 
 function filterTimelineItemsByActivity(timelineItems, { id }) {
@@ -42,11 +90,8 @@ function filterTimelineItemsByActivity(timelineItems, { id }) {
 function generateTimelineItems() {
   return [...Array(HOURS_IN_DAY).keys()].map((hour) => ({
     hour,
-
-    activityId: null, // [0, 1, 2, 3, 4].includes(hour) ? activities.value[hour % 3].id : null,
-    activitySeconds: 0 // [0, 1, 2, 3, 4].includes(hour) ? hour * 600 : 0
-
-    // activityId: hour % 4 === 0 ? null : activities[hour % 2].id,
-    // activitySeconds: hour % 4 === 0 ? 0 : (15 * SECONDS_IN_MINUTE * hour) % SECONDS_IN_HOUR
+    activityId: null,
+    activitySeconds: 0,
+    isActive: false
   }))
 }

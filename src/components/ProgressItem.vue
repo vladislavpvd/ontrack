@@ -1,4 +1,5 @@
 <script setup>
+import { HUNDRED_PERCENT } from '../constants'
 import { formatSeconds } from '../functions'
 import { isActivityValid } from '../validators'
 import { useProgress } from '../composables/progress'
@@ -20,7 +21,7 @@ const { colorClass, percentage, trackedActivitySeconds } = useProgress(props.act
     <div class="flex h-5 overflow-hidden rounded bg-neutral-200">
       <div
         :class="['transition-all', colorClass]"
-        :style="{ width: `${Math.min(percentage, 100)}%` }"
+        :style="{ width: `${Math.min(percentage, HUNDRED_PERCENT)}%` }"
       />
     </div>
     <div class="flex justify-between font-mono text-sm">

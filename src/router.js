@@ -8,7 +8,7 @@ import TheProgress from './pages/TheProgress.vue'
 export const routes = {
   [PAGE_TIMELINE]: TheTimeline,
   [PAGE_ACTIVITIES]: TheActivities,
-  [PAGE_PROGRESS]: TheProgress,
+  [PAGE_PROGRESS]: TheProgress
 }
 
 export const currentPage = ref(normalizePageHash())
@@ -22,7 +22,7 @@ export function navigate(page) {
 export function normalizePageHash() {
   const page = window.location.hash.slice(1)
 
-  if (isPageValid) {
+  if (isPageValid(page)) {
     return page
   }
 
